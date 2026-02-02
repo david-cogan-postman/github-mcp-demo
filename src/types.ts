@@ -1,8 +1,10 @@
-// User type - OUTDATED: missing 'role' and 'created_at' fields
+// User type - Updated to match API response schema
 export interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
+  role: string;
+  created_at: string;
 }
 
 export interface Product {
