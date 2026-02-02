@@ -1,0 +1,16 @@
+{
+  "name": "github-mcp-demo-api",
+  "version": "1.0.0",
+  "description": "Test repository for Postman Agent Mode GitHub MCP prompts",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": ["postman", "mcp", "demo"],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}
