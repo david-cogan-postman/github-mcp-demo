@@ -1,0 +1,50 @@
+name: API Tests
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  api-tests:
+    name: Run API Tests with Newman
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Newman
+        run: npm install -g newman newman-reporter-htmlextra
+
+      - name: Run Collection Tests
+        run: |
+          newman run "https://api.postman.com/collections/43354355-267cb026-9dc2-43c9-8ba8-fbe5afe313a8?apikey=${{ secrets.POSTMAN_API_KEY }}" \
+            --reporters cli,htmlextra \
+            --reporter-htmlextra-export reports/api-test-report.html \
+            --suppress-exit-code 1
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-test-report
+          path: reports/
+          retention-days: 30
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## API Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "Collection: GitHub MCP Demo" >> $GITHUB_STEP_SUMMARY
+          echo "Requests tested:" >> $GITHUB_STEP_SUMMARY
+          echo "- Get User" >> $GITHUB_STEP_SUMMARY
+          echo "- Create Order (Success)" >> $GITHUB_STEP_SUMMARY
+          echo "- Create Order (Error)" >> $GITHUB_STEP_SUMMARY
+          echo "- List Products" >> $GITHUB_STEP_SUMMARY
+          echo "- Health Check" >> $GITHUB_STEP_SUMMARY
