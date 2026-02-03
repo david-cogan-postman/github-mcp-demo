@@ -3,19 +3,43 @@ import { Order, OrderItem } from './types';
 export function validateOrder(order: Order): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
-  // BUG: Missing validation for negative quantities
-  // This should check: item.quantity > 0
-  for (const item of order.items) {
-    if (!item.product_id) {
-      errors.push('Product ID is required');
+  // FIX: Validate shipping address exists before accessing properties
+  if (!order.shipping) {
+    errors.push('Shipping address is required');
+  } else {
+    if (!order.shipping.street) {
+      errors.push('Shipping street is required');
     }
-    // TODO: Add quantity validation here
+    if (!order.shipping.city) {
+      errors.push('Shipping city is required');
+    }
+    if (!order.shipping.zip) {
+      errors.push('Shipping zip code is required');
+    }
   }
 
-  // BUG: Missing validation for shipping address
-  // This should check that shipping is not null/undefined
-  if (!order.shipping.street) {
-    errors.push('Shipping street is required');
+  // FIX: Validate items array exists and is not empty
+  if (!order.items || order.items.length === 0) {
+    errors.push('Order must contain at least one item');
+  } else {
+    for (const item of order.items) {
+      if (!item.product_id) {
+        errors.push('Product ID is required');
+      }
+      // FIX: Add quantity validation - must be positive integer
+      if (typeof item.quantity !== 'number' || item.quantity <= 0) {
+        errors.push(`Invalid quantity for product ${item.product_id || 'unknown'}: quantity must be greater than 0`);
+      }
+      // FIX: Add price validation - must be non-negative
+      if (typeof item.price !== 'number' || item.price < 0) {
+        errors.push(`Invalid price for product ${item.product_id || 'unknown'}: price must be non-negative`);
+      }
+    }
+  }
+
+  // FIX: Validate user_id exists
+  if (!order.user_id) {
+    errors.push('User ID is required');
   }
 
   return {
